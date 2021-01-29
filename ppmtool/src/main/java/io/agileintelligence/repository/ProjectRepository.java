@@ -1,11 +1,9 @@
 package io.agileintelligence.repository;
 
-import io.agileintelligence.domain.Project;
+import io.agileintelligence.model.Project;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProjectRepository extends CrudRepository<Project, Long> {
-    @Override
-    Iterable<Project> findAllById(Iterable<Long> iterable);
 }

@@ -1,4 +1,4 @@
-package io.agileintelligence.domain;
+package io.agileintelligence.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
