@@ -5,4 +5,6 @@ import io.agileintelligence.model.Project;
 public interface IProjectService {
 
     Project saveOrUpdateProject(Project project);
+    Project findProjectByProjectIdentifier(String projectId);
+    Iterable<Project> findALlProjects();
 }
