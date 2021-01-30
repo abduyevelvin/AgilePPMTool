@@ -44,4 +44,11 @@ public class ProjectService implements  IProjectService {
 
         return projectRepository.findAll();
     }
+
+    @Override
+    public void deleteProjectByProjectIdentifier(String projectId) {
+        Project project = findProjectByProjectIdentifier(projectId);
+
+        projectRepository.delete(project);
+    }
 }
