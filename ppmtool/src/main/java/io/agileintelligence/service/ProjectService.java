@@ -1,5 +1,6 @@
 package io.agileintelligence.service;
 
+import io.agileintelligence.exception.ProjectIdException;
 import io.agileintelligence.model.Project;
 import io.agileintelligence.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,11 @@ public class ProjectService implements  IProjectService {
 
     @Override
     public Project saveOrUpdateProject(Project project) {
-        //Todo: add Logic
-        return projectRepository.save(project);
+        project.setProjectIdentifier(project.getProjectIdentifier().toUpperCase());
+        try {
+            return projectRepository.save(project);
+        } catch (Exception ex) {
+            throw new ProjectIdException("Project ID: '" + project.getProjectIdentifier() + "' is allready exists!");
+        }
     }
 }
