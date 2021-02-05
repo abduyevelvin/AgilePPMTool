@@ -28,13 +28,13 @@ public class ProjectContoller {
 
     @PostMapping("")
     public ResponseEntity<?> createNewProject(@Valid @RequestBody Project project, BindingResult result) {
-
         ResponseEntity<?> errorMap = Util.mapValidationMethod(result);
         if (errorMap != null) {
             return errorMap;
         }
 
         Project created = projectService.saveOrUpdateProject(project);
+
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 

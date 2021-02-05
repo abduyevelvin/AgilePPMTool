@@ -40,16 +40,17 @@ public class ProjectService implements  IProjectService {
 
             return projectRepository.save(project);
         } catch (Exception ex) {
-            throw new ProjectIdException("Project ID: '" + project.getProjectIdentifier() + "' is allready exists!");
+            throw new ProjectIdException(String.format("Project ID: '%s' is already exists!", project.getProjectIdentifier()));
         }
     }
 
     @Override
     public Project findProjectByProjectIdentifier(String projectId) {
-        Project project = projectRepository.findByProjectIdentifier(projectId.toUpperCase());
+        projectId = projectId.toUpperCase();
+        Project project = projectRepository.findByProjectIdentifier(projectId);
 
         if (project == null) {
-            throw new ProjectIdException("Project ID: '" + projectId.toUpperCase() + "' doesn't exist!");
+            throw new ProjectIdException(String.format("Project ID: '%s' doesn't exist!", projectId));
         }
 
         return project;
