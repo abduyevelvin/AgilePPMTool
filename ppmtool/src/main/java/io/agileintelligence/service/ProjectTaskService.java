@@ -38,11 +38,11 @@ public class ProjectTaskService implements IProjectTaskService {
             projectTask.setProjectSequence(projectId + "-" + backlogSeq);
             projectTask.setProjectIdentifier(projectId);
 
-            if (projectTask.getPriority() == null) /*|| projectTask.getPriority() == 0 in the future */{
+            if (projectTask.getPriority() == 0 || projectTask.getPriority() == null) {
                 projectTask.setPriority(3);
             }
 
-            if (projectTask.getStatus() == null) /*projectTask.getStatus().equalsIgnoreCase("") || projectTask.getStatus().isEmpty() ||*/ {
+            if (projectTask.getStatus().equalsIgnoreCase("") || projectTask.getStatus().isEmpty() || projectTask.getStatus() == null) {
                 projectTask.setStatus("TO_DO");
             }
 

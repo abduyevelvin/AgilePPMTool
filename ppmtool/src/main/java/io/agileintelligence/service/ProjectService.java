@@ -1,6 +1,7 @@
 package io.agileintelligence.service;
 
 import io.agileintelligence.exception.ProjectIdException;
+import io.agileintelligence.exception.ProjectNotFoundException;
 import io.agileintelligence.model.Backlog;
 import io.agileintelligence.model.Project;
 import io.agileintelligence.repository.BacklogRepository;
@@ -50,7 +51,7 @@ public class ProjectService implements  IProjectService {
         Project project = projectRepository.findByProjectIdentifier(projectId);
 
         if (project == null) {
-            throw new ProjectIdException(String.format("Project ID: '%s' doesn't exist!", projectId));
+            throw new ProjectNotFoundException(String.format("Project ID: '%s' doesn't exist!", projectId));
         }
 
         return project;
