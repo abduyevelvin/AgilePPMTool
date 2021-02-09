@@ -29,7 +29,7 @@ public class UserService implements IUserService {
             newUser.setConfirmPassword("");
             return userRepository.save(newUser);
         }catch (Exception e){
-            throw new UsernameAlreadyExistsException("Username '" + newUser.getUsername() + "' is already exist");
+            throw new UsernameAlreadyExistsException(String.format("Username '%s' is already exist", newUser.getUsername()));
         }
     }
 }

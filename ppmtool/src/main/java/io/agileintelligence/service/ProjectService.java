@@ -4,8 +4,10 @@ import io.agileintelligence.exception.ProjectIdException;
 import io.agileintelligence.exception.ProjectNotFoundException;
 import io.agileintelligence.model.Backlog;
 import io.agileintelligence.model.Project;
+import io.agileintelligence.model.User;
 import io.agileintelligence.repository.BacklogRepository;
 import io.agileintelligence.repository.ProjectRepository;
+import io.agileintelligence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,18 +18,22 @@ public class ProjectService implements  IProjectService {
 
     private ProjectRepository projectRepository;
     private BacklogRepository backlogRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, BacklogRepository backlogRepository) {
+    public ProjectService(ProjectRepository projectRepository, BacklogRepository backlogRepository, UserRepository userRepository) {
         this.projectRepository = projectRepository;
         this.backlogRepository = backlogRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
-    public Project saveOrUpdateProject(Project project) {
+    public Project saveOrUpdateProject(Project project, String username) {
         project.setProjectIdentifier(project.getProjectIdentifier().toUpperCase());
         try {
-
+            User user = userRepository.findByUsername(username);
+            project.setUser(user);
+            project.setProjectLeader(username);
             if (project.getId() == null) {
                 Backlog backlog = new Backlog();
                 project.setBacklog(backlog);

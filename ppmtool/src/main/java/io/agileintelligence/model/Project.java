@@ -28,6 +28,7 @@ public class Project {
     private String projectIdentifier;
     @NotBlank(message = "Project Description is required")
     private String description;
+    private String projectLeader;
 
     @JsonFormat(pattern = "yyyy-mm-dd")
     private Date start_date;
@@ -42,6 +43,10 @@ public class Project {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
     @JsonIgnore
     private Backlog backlog;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    private User user;
 
     @PrePersist
     protected void onCreate() {
