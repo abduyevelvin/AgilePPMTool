@@ -11,8 +11,6 @@ import io.agileintelligence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.print.attribute.standard.NumberUp;
-
 @Service
 public class ProjectService implements  IProjectService {
 
@@ -30,6 +28,17 @@ public class ProjectService implements  IProjectService {
     @Override
     public Project saveOrUpdateProject(Project project, String username) {
         project.setProjectIdentifier(project.getProjectIdentifier().toUpperCase());
+
+        if (project.getId() != null) {
+            Project existingProject = projectRepository.findByProjectIdentifier(project.getProjectIdentifier());
+
+            if ((existingProject != null) && (!existingProject.getProjectLeader().equalsIgnoreCase(username))) {
+                throw new ProjectNotFoundException(String.format("Project ID: '%s' doesn't exist in your account!", project.getProjectIdentifier()));
+            } else if (existingProject == null) {
+                throw new ProjectNotFoundException(String.format("Project ID: '%s' cannot be updated, because doesn't exist!", project.getProjectIdentifier()));
+            }
+        }
+
         try {
             User user = userRepository.findByUsername(username);
             project.setUser(user);
@@ -52,7 +61,7 @@ public class ProjectService implements  IProjectService {
     }
 
     @Override
-    public Project findProjectByProjectIdentifier(String projectId) {
+    public Project findProjectByProjectIdentifier(String projectId, String username) {
         projectId = projectId.toUpperCase();
         Project project = projectRepository.findByProjectIdentifier(projectId);
 
@@ -60,18 +69,22 @@ public class ProjectService implements  IProjectService {
             throw new ProjectNotFoundException(String.format("Project ID: '%s' doesn't exist!", projectId));
         }
 
+        if(!project.getProjectLeader().equalsIgnoreCase(username)) {
+            throw new ProjectNotFoundException(String.format("Project ID: '%s' doesn't exist in your account!", projectId));
+        }
+
         return project;
     }
 
     @Override
-    public Iterable<Project> findALlProjects() {
+    public Iterable<Project> findALlProjects(String username) {
 
-        return projectRepository.findAll();
+        return projectRepository.findAllByProjectLeader(username);
     }
 
     @Override
-    public void deleteProjectByProjectIdentifier(String projectId) {
-        Project project = findProjectByProjectIdentifier(projectId);
+    public void deleteProjectByProjectIdentifier(String projectId, String username) {
+        Project project = findProjectByProjectIdentifier(projectId, username);
 
         projectRepository.delete(project);
     }

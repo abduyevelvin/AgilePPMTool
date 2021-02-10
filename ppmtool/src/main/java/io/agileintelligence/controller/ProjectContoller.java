@@ -40,21 +40,21 @@ public class ProjectContoller {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAllProjects() {
+    public ResponseEntity<?> getAllProjects(Principal principal) {
 
-        return new ResponseEntity<>(projectService.findALlProjects(), HttpStatus.OK);
+        return new ResponseEntity<>(projectService.findALlProjects(principal.getName()), HttpStatus.OK);
     }
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<?> getProjectById(@PathVariable String projectId) {
-        Project project = projectService.findProjectByProjectIdentifier(projectId);
+    public ResponseEntity<?> getProjectById(@PathVariable String projectId, Principal principal) {
+        Project project = projectService.findProjectByProjectIdentifier(projectId, principal.getName());
 
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
     @DeleteMapping("/{projectId}")
-    public ResponseEntity<?> deleteProjectByProjectId(@PathVariable String projectId) {
-        projectService.deleteProjectByProjectIdentifier(projectId);
+    public ResponseEntity<?> deleteProjectByProjectId(@PathVariable String projectId, Principal principal) {
+        projectService.deleteProjectByProjectIdentifier(projectId, principal.getName());
 
         return new ResponseEntity<>("Project with ID: '" + projectId.toUpperCase() + "' was deleted!", HttpStatus.OK);
     }

@@ -1,5 +1,6 @@
 package io.agileintelligence.service;
 
+import io.agileintelligence.exception.ProjectIdException;
 import io.agileintelligence.exception.ProjectNotFoundException;
 import io.agileintelligence.model.Backlog;
 import io.agileintelligence.model.ProjectTask;
@@ -23,60 +24,51 @@ public class ProjectTaskService implements IProjectTaskService {
     }
 
     @Override
-    public ProjectTask addProjectTask(String projectId, ProjectTask projectTask) {
+    public ProjectTask addProjectTask(String projectId, ProjectTask projectTask, String username) {
         projectId = projectId.toUpperCase();
 
-        try {
-            Backlog backlog = backlogRepository.findByProjectIdentifier(projectId);
+        Backlog backlog = projectService.findProjectByProjectIdentifier(projectId, username).getBacklog();
+        projectTask.setBacklog(backlog);
 
-            projectTask.setBacklog(backlog);
+        Integer backlogSeq = backlog.getPTSequence();
+        backlogSeq++;
+        backlog.setPTSequence(backlogSeq);
 
-            Integer backlogSeq = backlog.getPTSequence();
-            backlogSeq++;
-            backlog.setPTSequence(backlogSeq);
+        projectTask.setProjectSequence(projectId + "-" + backlogSeq);
+        projectTask.setProjectIdentifier(projectId);
 
-            projectTask.setProjectSequence(projectId + "-" + backlogSeq);
-            projectTask.setProjectIdentifier(projectId);
-
-            if (projectTask.getPriority() == 0 || projectTask.getPriority() == null) {
-                projectTask.setPriority(3);
-            }
-
-            if (projectTask.getStatus().equalsIgnoreCase("") || projectTask.getStatus().isEmpty() || projectTask.getStatus() == null) {
-                projectTask.setStatus("TO_DO");
-            }
-
-            return projectTaskRepository.save(projectTask);
-        } catch (Exception ex) {
-            throw new ProjectNotFoundException(String.format("Project not found by ID: %s", projectId));
+        if (projectTask.getPriority() == null || projectTask.getPriority() == 0) {
+            projectTask.setPriority(3);
         }
+        if (projectTask.getStatus() == null || projectTask.getStatus().equalsIgnoreCase("") || projectTask.getStatus().isEmpty()) {
+            projectTask.setStatus("TO_DO");
+        }
+
+        return projectTaskRepository.save(projectTask);
     }
 
     @Override
-    public Iterable<ProjectTask> findTasksByProjectId(String projectId) {
+    public Iterable<ProjectTask> findTasksByProjectId(String projectId, String username) {
         projectId = projectId.toUpperCase();
 
-        projectService.findProjectByProjectIdentifier(projectId);
+        projectService.findProjectByProjectIdentifier(projectId, username);
 
         return projectTaskRepository.findByProjectIdentifierOrderByPriority(projectId);
     }
 
     @Override
-    public ProjectTask findTaskByProjectSequence(String backlogId, String sequence) {
+    public ProjectTask findTaskByProjectSequence(String backlogId, String sequence, String username) {
         backlogId = backlogId.toUpperCase();
         sequence = sequence.toUpperCase();
 
-        Backlog backlog = backlogRepository.findByProjectIdentifier(backlogId);
-        if (backlog == null) {
-            throw new ProjectNotFoundException(String.format("Project not found by ID: %s", backlogId));
-        }
+        projectService.findProjectByProjectIdentifier(backlogId, username);
 
         ProjectTask projectTask = projectTaskRepository.findByProjectSequence(sequence);
         if (projectTask == null) {
             throw new ProjectNotFoundException(String.format("Project Task not found by ID: %s", sequence));
         }
 
-        if(!projectTask.getProjectIdentifier().equalsIgnoreCase(backlogId)) {
+        if (!projectTask.getProjectIdentifier().equalsIgnoreCase(backlogId)) {
             throw new ProjectNotFoundException(String.format("Project Task by ID: '%1$s' doesn't exist in Project: %2$s", sequence, backlogId));
         }
 
@@ -84,17 +76,23 @@ public class ProjectTaskService implements IProjectTaskService {
     }
 
     @Override
-    public ProjectTask updateTaskByProjectSequence(ProjectTask updatedTask, String backlogId, String sequence) {
-        ProjectTask projectTask = findTaskByProjectSequence(backlogId, sequence);
+    public ProjectTask updateTaskByProjectSequence(ProjectTask updatedTask, String backlogId, String sequence, String username) {
+        ProjectTask projectTask = findTaskByProjectSequence(backlogId, sequence, username);
+
+        if (projectTask.getId() != updatedTask.getId()) {
+            throw new ProjectIdException(String.format("Project Task ID: '%1$s' doesn't belong to the Backlog: '%2$s'", updatedTask.getId(), backlogId));
+        }
 
         projectTask = updatedTask;
+        projectTask.setProjectIdentifier(backlogId.toUpperCase());
+        projectTask.setProjectSequence(sequence.toUpperCase());
 
         return projectTaskRepository.save(projectTask);
     }
 
     @Override
-    public void deleteTaskByProjectIdentifier(String backlogId, String sequence) {
-        ProjectTask projectTask = findTaskByProjectSequence(backlogId, sequence);
+    public void deleteTaskByProjectIdentifier(String backlogId, String sequence, String username) {
+        ProjectTask projectTask = findTaskByProjectSequence(backlogId, sequence, username);
 
         projectTaskRepository.delete(projectTask);
     }
