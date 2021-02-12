@@ -4,7 +4,6 @@ import ProjectItem from "./Project/ProjectItem";
 import { connect } from "react-redux";
 import { getProjects } from "../actions/projectActions";
 import PropTypes from "prop-types";
-import projectReducer from "../reducers/projectReducer";
 
 class Dashboard extends Component {
   componentDidMount() {
